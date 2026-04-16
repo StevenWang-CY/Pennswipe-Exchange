@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+*.db
+client/dist/
+server/dist/
+.DS_Store
+client/.vite/
+CIS1962_Final_Project_Proposal.md
+PennSwipe_Exchange_Spec.md

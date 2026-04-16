@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Side {
+  BID
+  ASK
+}
+
+enum OrderStatus {
+  OPEN
+  FILLED
+  CANCELLED
+}
+
+model User {
+  id                  String   @id @default(cuid())
+  email               String   @unique
+  username            String   @unique
+  passwordHash        String
+  displayName         String?
+  diningDollarBalance Float    @default(100.0)
+  swipeBalance        Int      @default(10)
+  createdAt           DateTime @default(now())
+
+  orders     Order[] @relation("UserOrders")
+  buyTrades  Trade[] @relation("BuyerTrades")
+  sellTrades Trade[] @relation("SellerTrades")
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  userId    String
+  side      Side
+  price     Float
+  quantity  Int
+  status    OrderStatus @default(OPEN)
+  createdAt DateTime    @default(now())
+
+  user      User    @relation("UserOrders", fields: [userId], references: [id])
+  buyTrade  Trade?  @relation("BuyOrder")
+  sellTrade Trade?  @relation("SellOrder")
+}
+
+model Trade {
+  id          String   @id @default(cuid())
+  buyOrderId  String   @unique
+  sellOrderId String   @unique
+  buyerId     String
+  sellerId    String
+  price       Float
+  quantity    Int
+  executedAt  DateTime @default(now())
+
+  buyOrder  Order @relation("BuyOrder", fields: [buyOrderId], references: [id])
+  sellOrder Order @relation("SellOrder", fields: [sellOrderId], references: [id])
+  buyer     User  @relation("BuyerTrades", fields: [buyerId], references: [id])
+  seller    User  @relation("SellerTrades", fields: [sellerId], references: [id])
+}
